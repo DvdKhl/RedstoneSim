@@ -18,6 +18,8 @@ namespace RedstoneLib {
 
 		internal RSComponent Component { get; private set; }
 
+		internal RSBridge Bridge { get; set; }
+
 		internal RSConnection(RSComponent component, ConnectionDirection direction)
 			: base(component.Engine) {
 
@@ -29,7 +31,12 @@ namespace RedstoneLib {
 
 		private long lastChangeOn;
 		internal void StimulateSignal(int powerLevel) {
-			if(PowerLevel == powerLevel) return;
+			if(FullName.Equals("A.In")) Debug.WriteLine("C " + powerLevel + " " + PowerLevel);
+
+			if(PowerLevel == powerLevel) {
+				lastChangeOn = CurrentTick; //Refresh
+				return;
+			}
 
 			if(lastChangeOn == CurrentTick) {
 				if(PowerLevel > powerLevel) return;
@@ -42,7 +49,7 @@ namespace RedstoneLib {
 		}
 
 		public override string ToString() {
-			return string.Format("RSConnection( FullName={0}, Direction={1}, PowerLevel={2} )", FullName, Direction, PowerLevel);
+			return string.Format("Conn({0}, {1}, {2})", FullName, Direction, PowerLevel);
 		}
 	}
 

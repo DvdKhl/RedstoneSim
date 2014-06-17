@@ -17,18 +17,19 @@ namespace RedstoneLib.Components {
 		public RSConnection Lock { get; private set; }
 
 		private Queue<bool> memory;
-		private int ticksUntilStable;
+		private bool actionScheduled;
 
-		public Repeater(RSEngine engine) : base(engine) {
+		public Repeater(RSEngine engine)
+			: base(engine) {
 			Output = CreateOutput("Out");
 			Input = CreateInput("In");
 			Lock = CreateInput("Lock");
 
-			Delay = 4;
+			Delay = 1;
 
 			Input.SignalChanging += (object sender, int powerLevel) => {
-				if(ticksUntilStable == 0) {
-					ticksUntilStable = Delay + 1;
+				if(!actionScheduled) {
+					actionScheduled = true;
 					ScheduleAction(UpdateState, CurrentTick + 1);
 				}
 			};
@@ -41,54 +42,26 @@ namespace RedstoneLib.Components {
 
 		private long lastTick;
 		private void UpdateState() {
-
+			actionScheduled = false;
 			if(lastTick == CurrentTick) return;
 			lastTick = CurrentTick;
 
-			if(ticksUntilStable > 0) {
-				ticksUntilStable--;
+			if(memory.Count < Delay) memory.Enqueue(Input.PowerLevel > 0);
+
+			var outputLevel = memory.Count >= Delay && memory.Dequeue() ? RSEngine.MaxPowerLevel : 0;
+			if(Lock.PowerLevel > 0) outputLevel = Output.PowerLevel;
+
+			if(outputLevel != Output.PowerLevel) ScheduleStimulus(Output, outputLevel);
+
+			if(!memory.All(x => x == outputLevel > 0)) {
 				ScheduleAction(UpdateState, CurrentTick + 1);
-			}
-
-			if(memory.Count < Delay) memory.Enqueue(Input.PowerLevel > 0);
-
-			var outputLevel = memory.Count >= Delay && memory.Dequeue() ? RSEngine.MaxPowerLevel : 0;
-
-
-			if(Lock.PowerLevel > 0) outputLevel = Output.PowerLevel;
-
-			if(outputLevel != Output.PowerLevel) {
-				ScheduleStimulus(Output, outputLevel);
+				actionScheduled = true;
 			}
 
 			IsLocked = Lock.PowerLevel > 0;
 			IsActive = outputLevel > 0;
 		}
 
-		private void UpdateStateB() {
-
-			if(lastTick == CurrentTick) return;
-			lastTick = CurrentTick;
-
-			if(ticksUntilStable > 0) {
-				ticksUntilStable--;
-				ScheduleAction(UpdateStateB, CurrentTick + 1);
-			}
-
-			if(memory.Count < Delay) memory.Enqueue(Input.PowerLevel > 0);
-
-			var outputLevel = memory.Count >= Delay && memory.Dequeue() ? RSEngine.MaxPowerLevel : 0;
-
-
-			if(Lock.PowerLevel > 0) outputLevel = Output.PowerLevel;
-
-			if(outputLevel != Output.PowerLevel) {
-				ScheduleStimulus(Output, outputLevel);
-			}
-
-			IsLocked = Lock.PowerLevel > 0;
-			IsActive = outputLevel > 0;
-		}
 
 		public override string ToString() {
 			var outStr = Output.PowerLevel > 0 ? "1" : "0";

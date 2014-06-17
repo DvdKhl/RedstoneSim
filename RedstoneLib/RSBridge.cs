@@ -18,7 +18,8 @@ namespace RedstoneLib {
 		public static RSBridge Create(params RSConnection[] connections) { return new RSBridge(connections[0].Engine, connections); }
 		public static RSBridge Create(IEnumerable<RSConnection> connections) { return new RSBridge(connections.First().Engine, connections); }
 
-		private RSBridge(RSEngine engine, IEnumerable<RSConnection> connections) : base(engine) {
+		private RSBridge(RSEngine engine, IEnumerable<RSConnection> connections)
+			: base(engine) {
 			this.connections = new List<RSConnection>();
 
 			foreach(var c in connections) {
@@ -36,8 +37,9 @@ namespace RedstoneLib {
 			var oldPowerLevel = PowerLevel;
 			PowerLevel = connections.Max(c => c.Direction == ConnectionDirection.Out ? (c == outConnection ? newPowerLevel : c.PowerLevel) : 0);
 
-			if(PowerLevel != oldPowerLevel) {
+			if("B1".Equals(Label) || "B2".Equals(Label)) Debug.WriteLine(Label + " " + oldPowerLevel + " " + PowerLevel);
 
+			if(PowerLevel != oldPowerLevel) {
 				if(lastPowerLevelChangeOn == CurrentTick) {
 					if(PowerLevel > oldPowerLevel) return;
 					throw new InvalidOperationException("Bridge PowerLevel was raised twice within one tick");
@@ -45,7 +47,7 @@ namespace RedstoneLib {
 				lastPowerLevelChangeOn = CurrentTick;
 
 				foreach(var inConnection in connections) {
-					if(sender != inConnection && inConnection.Direction == ConnectionDirection.In && inConnection.PowerLevel != PowerLevel) {
+					if(sender != inConnection && inConnection.Direction == ConnectionDirection.In && inConnection.PowerLevel != PowerLevel) { //Powerlevel check wrong for multiple bridges on one connection?
 						ScheduleStimulus(inConnection, PowerLevel);
 					}
 				}
