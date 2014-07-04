@@ -16,13 +16,13 @@ namespace RedstoneSim {
 
 			for(int i = 0; i < rs.Length; i++) {
 				rs[i] = new Repeater(engine) { Label = ((char)('A' + i)).ToString() };
-				if(i > 0) RSBridge.Create(rs[i - 1].Output, rs[i].Input);
+				if(i > 0) RSBridge.Connect(rs[i - 1].Output, rs[i].Input);
 			}
-			var fwBridge = RSBridge.Create(rs.Last().Output, rs[0].Input, rs[1].Output);
+			var fwBridge = RSBridge.Connect(rs.Last().Output, rs[0].Input, rs[1].Output);
 			fwBridge.Label = "B1";
 
 			var lever = new Lever(engine);
-			RSBridge.Create(lever.Output, rs[2].Input);
+			RSBridge.Connect(lever.Output, rs[2].Input);
 
 
 			var sw = new Stopwatch();

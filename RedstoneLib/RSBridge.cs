@@ -43,11 +43,18 @@ namespace RedstoneLib {
 
 			this.connections.Add(connection);
 			if(connection.Direction == ConnectionDirection.Out) connection.SignalChanging += OnOutSignalChanging;
+
+			PowerLevel = connections.Max(c => c.Direction == ConnectionDirection.Out ? c.PowerLevel : 0);
+			UpdateConnections(connection);
+
 		}
 		private void Remove(RSConnection connection) {
 			connections.Remove(connection);
 			connection.Bridge = null;
 			connection.SignalChanging -= OnOutSignalChanging;
+
+			PowerLevel = connections.Max(c => c.Direction == ConnectionDirection.Out ? c.PowerLevel : 0);
+			UpdateConnections(connection);
 		}
 
 		private RSBridge(RSEngine engine, IEnumerable<RSConnection> connections)
@@ -55,10 +62,9 @@ namespace RedstoneLib {
 			this.connections = new List<RSConnection>();
 
 			foreach(var c in connections) Add(c);
-			OnOutSignalChanging(null, -1);
 		}
 
-		private void OnOutSignalChanging(object sender, int newPowerLevel) {
+		private void OnOutSignalChanging(object sender, int newPowerLevel) { //TODO: Change to OnOutSignalChanged event and remove the UpdateConnections parameter
 			var outConnection = (RSConnection)sender;
 
 			var oldPowerLevel = PowerLevel;
@@ -71,10 +77,14 @@ namespace RedstoneLib {
 				}
 				lastPowerLevelChangeOn = CurrentTick;
 
-				foreach(var inConnection in connections) {
-					if(sender != inConnection && inConnection.Direction == ConnectionDirection.In && inConnection.PowerLevel != PowerLevel) { //Powerlevel check wrong for multiple bridges on one connection?
-						ScheduleStimulus(inConnection, PowerLevel);
-					}
+				UpdateConnections(outConnection);
+			}
+		}
+
+		private void UpdateConnections(RSConnection eventConnection) {
+			foreach(var connection in connections) {
+				if(eventConnection != connection && connection.Direction == ConnectionDirection.In && connection.PowerLevel != PowerLevel) { //Powerlevel check wrong for multiple bridges on one connection?
+					ScheduleStimulus(connection, PowerLevel);
 				}
 			}
 		}
