@@ -42,19 +42,19 @@ namespace RedstoneLib {
 			connection.Bridge = this;
 
 			this.connections.Add(connection);
-			if(connection.Direction == ConnectionDirection.Out) connection.SignalChanging += OnOutSignalChanging;
+			if(connection.Direction == ConnectionDirection.Out) connection.SignalChanged += OnOutSignalChanged;
 
 			PowerLevel = connections.Max(c => c.Direction == ConnectionDirection.Out ? c.PowerLevel : 0);
-			UpdateConnections(connection);
+			UpdateConnections();
 
 		}
 		private void Remove(RSConnection connection) {
 			connections.Remove(connection);
 			connection.Bridge = null;
-			connection.SignalChanging -= OnOutSignalChanging;
+			connection.SignalChanged -= OnOutSignalChanged;
 
 			PowerLevel = connections.Max(c => c.Direction == ConnectionDirection.Out ? c.PowerLevel : 0);
-			UpdateConnections(connection);
+			UpdateConnections();
 		}
 
 		private RSBridge(RSEngine engine, IEnumerable<RSConnection> connections)
@@ -64,11 +64,10 @@ namespace RedstoneLib {
 			foreach(var c in connections) Add(c);
 		}
 
-		private void OnOutSignalChanging(object sender, int newPowerLevel) { //TODO: Change to OnOutSignalChanged event and remove the UpdateConnections parameter
+		private void OnOutSignalChanged(object sender, int oldPowerLevel) {
 			var outConnection = (RSConnection)sender;
 
-			var oldPowerLevel = PowerLevel;
-			PowerLevel = connections.Max(c => c.Direction == ConnectionDirection.Out ? (c == outConnection ? newPowerLevel : c.PowerLevel) : 0);
+			PowerLevel = connections.Max(c => c.Direction == ConnectionDirection.Out ? c.PowerLevel : 0);
 
 			if(PowerLevel != oldPowerLevel) {
 				if(lastPowerLevelChangeOn == CurrentTick) {
@@ -77,13 +76,13 @@ namespace RedstoneLib {
 				}
 				lastPowerLevelChangeOn = CurrentTick;
 
-				UpdateConnections(outConnection);
+				UpdateConnections();
 			}
 		}
 
-		private void UpdateConnections(RSConnection eventConnection) {
+		private void UpdateConnections() {
 			foreach(var connection in connections) {
-				if(eventConnection != connection && connection.Direction == ConnectionDirection.In && connection.PowerLevel != PowerLevel) { //Powerlevel check wrong for multiple bridges on one connection?
+				if(connection.Direction == ConnectionDirection.In && connection.PowerLevel != PowerLevel) {
 					ScheduleStimulus(connection, PowerLevel);
 				}
 			}

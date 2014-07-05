@@ -3,21 +3,19 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace RedstoneLib {
 	public sealed class RSConnection : RSObject {
-
-		public event EventHandler<int> SignalChanging = delegate { };
+		public event EventHandler<int> SignalChanged = delegate { };
 
 		public string FullName { get { return (Component.Label != null ? Component.Label + "." : "") + Label; } }
 
 		public ConnectionDirection Direction { get; private set; }
-
 		public int PowerLevel { get; private set; }
 
 		internal RSComponent Component { get; private set; }
-
 		internal RSBridge Bridge { get; set; }
 
 		internal RSConnection(RSComponent component, ConnectionDirection direction)
@@ -44,8 +42,10 @@ namespace RedstoneLib {
 			}
 			lastChangeOn = CurrentTick;
 
-			SignalChanging(this, powerLevel);
+			var oldPowerLevel = PowerLevel;
 			PowerLevel = powerLevel;
+
+			SignalChanged(this, oldPowerLevel);
 		}
 
 		public override string ToString() {

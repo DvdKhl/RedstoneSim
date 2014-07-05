@@ -27,14 +27,14 @@ namespace RedstoneLib.Components {
 
 			Delay = 1;
 
-			Input.SignalChanging += (object sender, int powerLevel) => {
+			Input.SignalChanged += (object sender, int powerLevel) => {
 				if(!actionScheduled) {
 					actionScheduled = true;
 					ScheduleAction(UpdateState, CurrentTick + 1);
 				}
 			};
 
-			Lock.SignalChanging += (s, p) => ScheduleAction(UpdateState, CurrentTick + 1);
+			Lock.SignalChanged += (s, p) => ScheduleAction(UpdateState, CurrentTick + 1);
 
 			memory = new Queue<bool>(MaxDelay);
 			for(int i = 1; i < Delay; i++) memory.Enqueue(false);
