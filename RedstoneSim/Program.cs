@@ -17,9 +17,11 @@ namespace RedstoneSim {
 			for(int i = 0; i < rs.Length; i++) {
 				rs[i] = new Repeater(engine) { Label = ((char)('A' + i)).ToString() };
 				if(i > 0) RSBridge.Connect(rs[i - 1].Output, rs[i].Input);
+
+				rs[i].Delay = 2;
 			}
-			var fwBridge = RSBridge.Connect(rs.Last().Output, rs[0].Input, rs[1].Output);
-			fwBridge.Label = "B1";
+			RSBridge.Connect(rs.Last().Output, rs[0].Input);
+			RSBridge.Connect(rs[0].Input, rs[1].Input);
 
 			var lever = new Lever(engine);
 			RSBridge.Connect(lever.Output, rs[2].Input);

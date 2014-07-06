@@ -30,7 +30,19 @@ namespace RedstoneLib {
 			if(bridge == null) return Create(connections);
 
 			foreach(var connection in connections) {
-				if(bridge != connection.Bridge) bridge.Add(connection);
+				if(connection.Bridge == null) {
+					bridge.Add(connection);
+
+				} else if(bridge != connection.Bridge) {
+					var otherBridge = connection.Bridge;
+					foreach(var otherConnection in otherBridge.connections) {
+						otherConnection.Bridge = null;
+						otherConnection.SignalChanged -= otherBridge.OnOutSignalChanged;
+
+						bridge.Add(otherConnection);
+					}
+					otherBridge.connections.Clear();
+				}
 			}
 
 			return bridge;
