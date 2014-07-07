@@ -12,51 +12,27 @@ namespace RedstoneSim {
 		static void Main(string[] args) {
 			var engine = new RSEngine();
 
-			var rs = new Repeater[9];
+			var rs = new LatchArray[9];
 
 			for(int i = 0; i < rs.Length; i++) {
-				rs[i] = new Repeater(engine) { Label = ((char)('A' + i)).ToString() };
+				rs[i] = new LatchArray(engine) { Label = ((char)('A' + i)).ToString() };
 				if(i > 0) RSBridge.Connect(rs[i - 1].Output, rs[i].Input);
 
-				rs[i].Delay = 2;
+				rs[i].Delay = 1;
 			}
 			RSBridge.Connect(rs.Last().Output, rs[0].Input);
-			RSBridge.Connect(rs[0].Input, rs[1].Input);
 
-			var lever = new Lever(engine);
-			RSBridge.Connect(lever.Output, rs[2].Input);
+			var clock = new Clock(engine);
+			clock.HighWidth = clock.LowWidth = 2;
+
+			RSBridge.Connect(clock.Output, rs[0].Input);
+
 
 
 			var sw = new Stopwatch();
 
+
 			while(true) {
-				switch(engine.CurrentTick) {
-					case 1: lever.SetState(true); break;
-					case 2: lever.SetState(false); break;
-
-					//case 8: for(int i = 0; i < rs.Length; i++) engine.ScheduleStimulus(rs[i].Lock, RSEngine.MaxPowerLevel); break;
-					//case 16: for(int i = 0; i < rs.Length; i++) engine.ScheduleStimulus(rs[i].Lock, 0); break;
-					//case 6: for(int i = 0; i < rs.Length; i++) engine.ScheduleStimulus(rs[i].Lock, RSEngine.MaxPowerLevel); break;
-					//case 7: for(int i = 0; i < rs.Length; i++) engine.ScheduleStimulus(rs[i].Lock, 0); break;
-					//case 8: for(int i = 0; i < rs.Length; i++) engine.ScheduleStimulus(rs[i].Lock, RSEngine.MaxPowerLevel); break;
-					//case 9: for(int i = 0; i < rs.Length; i++) engine.ScheduleStimulus(rs[i].Lock, 0); break;
-				}
-
-				if((engine.CurrentTick % 10) < 5) {
-					if((engine.CurrentTick % 2) == 0) {
-						Console.ForegroundColor = ConsoleColor.Gray;
-					} else {
-						Console.ForegroundColor = ConsoleColor.DarkGray;
-					}
-				} else {
-					if((engine.CurrentTick % 2) == 0) {
-						Console.ForegroundColor = ConsoleColor.Gray;
-					} else {
-						Console.ForegroundColor = ConsoleColor.DarkGray;
-					}
-				}
-
-
 				Console.Write("T" + engine.CurrentTick + "\t");
 
 				sw.Restart();
