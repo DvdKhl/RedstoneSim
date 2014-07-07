@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace RedstoneLib.Components {
-	public class Repeater : RSComponent {
+	public class LatchArray : RSComponent {
 		public const int MaxDelay = 5;
 
 		public bool IsActive { get; protected set; }
@@ -19,7 +19,7 @@ namespace RedstoneLib.Components {
 		private Queue<bool> memory;
 		private bool actionScheduled;
 
-		public Repeater(RSEngine engine)
+		public LatchArray(RSEngine engine)
 			: base(engine) {
 			Output = CreateOutput("Out");
 			Input = CreateInput("In");

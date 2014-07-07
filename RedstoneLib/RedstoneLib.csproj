@@ -39,8 +39,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Components\Clock.cs" />
     <Compile Include="Components\Lever.cs" />
-    <Compile Include="Components\Repeater.cs" />
+    <Compile Include="Components\LatchArray.cs" />
     <Compile Include="RSBridge.cs" />
     <Compile Include="RSComponent.cs" />
     <Compile Include="RSConnection.cs" />
