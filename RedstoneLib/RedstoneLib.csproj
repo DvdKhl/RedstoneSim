@@ -39,6 +39,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Components\LogicGate.cs" />
     <Compile Include="Components\Clock.cs" />
     <Compile Include="Components\Lever.cs" />
     <Compile Include="Components\LatchArray.cs" />

@@ -24,12 +24,16 @@ namespace RedstoneSim {
 
 			var clock = new Clock(engine);
 			clock.HighWidth = clock.LowWidth = 2;
+			clock.Enabled = true;
 
 			RSBridge.Connect(clock.Output, rs[0].Input);
 
 
+			var logicGate = new LogicGate(engine);
+			logicGate.Logic = clock.Output.ToLogic() & clock.Output.ToLogic();
 
 			var sw = new Stopwatch();
+
 
 
 			while(true) {
