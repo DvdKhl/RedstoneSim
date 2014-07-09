@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace RedstoneLib {
 	public class RSEngine {
 		public const int MaxPowerLevel = 15;
-		public const int MaxFutureTicks = 8;
+		public const int MaxFutureTicks = 32;
 
 		public long CurrentTick { get; private set; }
 
