@@ -10,7 +10,16 @@ namespace RedstoneLib.Components {
 	public class LogicGate : RSComponent {
 		public RSConnection Output { get; private set; }
 
-		private long lastUpdateTick;
+
+		private int delay;
+		public int Delay {
+			get { return delay; }
+			set {
+				if(delay <= 0) throw new InvalidOperationException("Delay must be longer than 0");
+				if(delay > RSEngine.MaxFutureTicks) throw new InvalidOperationException("Delay must be shorter than RSEngine.MaxFutureTicks (" + RSEngine.MaxFutureTicks + ")");
+				delay = value;
+			}
+		}
 
 		private CompositeLogic logic;
 		public CompositeLogic Logic {
@@ -23,21 +32,30 @@ namespace RedstoneLib.Components {
 				if(logic != null) logic.SignalChanged += SignalChangedHandler;
 			}
 		}
+
+		private long lastSignalChangeTick;
 		private void SignalChangedHandler(object sender, int oldLevel) {
-			if(lastUpdateTick == CurrentTick) return;
-			ScheduleAction(UpdateState, CurrentTick + 1);
-			lastUpdateTick = CurrentTick;
+			if(lastSignalChangeTick == CurrentTick) return;
+			lastSignalChangeTick = CurrentTick;
+			ScheduleAction(UpdateState, CurrentTick + Delay);
 		}
+
+		private long lastUpdateTick;
 		private void UpdateState() {
+			if(lastUpdateTick == CurrentTick) return;
+
 			var powerLevel = Logic.Evaluate();
 			if(powerLevel != Output.PowerLevel) {
 				ScheduleStimulus(Output, powerLevel);
+				lastUpdateTick = CurrentTick;
 			}
 		}
 
 		public LogicGate(RSEngine engine)
 			: base(engine) {
 			Output = CreateOutput("Out");
+
+			Delay = 1;
 		}
 
 	}
@@ -46,8 +64,6 @@ namespace RedstoneLib.Components {
 		public abstract int Evaluate();
 		public abstract event EventHandler<int> SignalChanged;
 
-		public static implicit operator CompositeLogic(RSConnection connection) { return new CompositeLogicConnection(connection); }
-
 		public static CompositeLogic operator &(CompositeLogic a, CompositeLogic b) { return new CompositeLogicAnd(a, b); }
 		public static CompositeLogic operator |(CompositeLogic a, CompositeLogic b) { return new CompositeLogicOr(a, b); }
 		public static CompositeLogic operator !(CompositeLogic input) { return new CompositeLogicNot(input); }
@@ -55,7 +71,10 @@ namespace RedstoneLib.Components {
 	public class CompositeLogicConnection : CompositeLogic {
 		public RSConnection Connection { get; private set; }
 
-		public CompositeLogicConnection(RSConnection connection) { Connection = connection; }
+		public CompositeLogicConnection(RSConnection connection) { 
+			Connection = connection;
+			if(connection.Direction != ConnectionDirection.Out) throw new ArgumentException("Connection direction must be out");
+		}
 
 		public override int Evaluate() { return Connection.PowerLevel; }
 		public override event EventHandler<int> SignalChanged {
@@ -110,6 +129,6 @@ namespace RedstoneLib.Components {
 	}
 
 	public static class CompositeLogicExt {
-		public static CompositeLogic ToLogic(this RSConnection connection) { return (CompositeLogic)connection; }
+		public static CompositeLogic ToLogic(this RSConnection connection) { return new CompositeLogicConnection(connection); }
 	}
 }
