@@ -10,15 +10,19 @@ using System.Threading.Tasks;
 namespace RedstoneSim {
 	class Program {
 		static void Main(string[] args) {
+			Playground2();
+		}
+
+		private static void Playground() {
 			var engine = new RSEngine();
 
-			var rs = new LatchArray[9];
+			var rs = new ShiftRegister[9];
 
 			for(int i = 0; i < rs.Length; i++) {
-				rs[i] = new LatchArray(engine) { Label = ((char)('A' + i)).ToString() };
+				rs[i] = new ShiftRegister(engine) { Label = ((char)('A' + i)).ToString() };
 				if(i > 0) RSBridge.Connect(rs[i - 1].Output, rs[i].Input);
 
-				rs[i].Delay = 1;
+				rs[i].CellCount = 1;
 			}
 			RSBridge.Connect(rs.Last().Output, rs[0].Input);
 
@@ -47,8 +51,34 @@ namespace RedstoneSim {
 				//Console.Write(string.Concat(rs.Select(x => x.Output.PowerLevel > 0 ? "1" : "0")));
 				Console.WriteLine(" after " + sw.ElapsedMilliseconds + "ms");
 			}
+		}
+
+		private static void Playground2() {
+			var engine = new RSEngine();
+
+			var register = new ShiftRegister(engine);
+			register.CellCount = 16;
+
+			var edgeDetector = new EdgeDetector(engine) {
+				Delay = 1,
+				IdlePowerLevel = RSEngine.MaxPowerLevel,
+				PulsePowerLevel = 0,
+				PulseWidth = 16
+			};
+
+			var signal = new SignalQueue(engine);
+			signal.AddSequence(new[] { 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0 });
+
+			RSBridge.Connect(signal.Output, register.Input, edgeDetector.Input);
+			RSBridge.Connect(register.Lock, edgeDetector.Output);
 
 
+			while(true) {
+				Console.Write("T" + engine.CurrentTick + "\t");
+				Console.WriteLine(register);
+
+				engine.DoTick();
+			}
 		}
 	}
 }
