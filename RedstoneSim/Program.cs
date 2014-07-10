@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace RedstoneSim {
 	class Program {
 		static void Main(string[] args) {
-			Playground2();
+			Playground3();
 		}
 
 		private static void Playground() {
@@ -27,7 +27,7 @@ namespace RedstoneSim {
 			RSBridge.Connect(rs.Last().Output, rs[0].Input);
 
 			var clock = new Clock(engine);
-			clock.HighWidth = clock.LowWidth = 2;
+			clock.PulseWidth = clock.IdleWidth = 2;
 			clock.Enabled = true;
 
 			RSBridge.Connect(clock.Output, rs[0].Input);
@@ -78,6 +78,33 @@ namespace RedstoneSim {
 				Console.WriteLine(register);
 
 				engine.DoTick();
+			}
+		}
+
+
+		private static void Playground3() {
+			var engine = new RSEngine();
+
+			var rs = new DelayLock[10241];
+
+			for(int i = 0; i < rs.Length; i++) {
+				rs[i] = new DelayLock(engine) { Delay = 1 };
+				if(i > 0) RSBridge.Connect(rs[i - 1].Output, rs[i].Input);
+			}
+			RSBridge.Connect(rs.Last().Output, rs[0].Input, rs[1].Output);
+
+			var sw = new Stopwatch();
+			while(true) {
+				Console.Write("T" + engine.CurrentTick + "\t");
+				sw.Restart();
+				engine.DoTick();
+				sw.Stop();
+
+				if(engine.CurrentTick == 1) engine.ScheduleStimulus(rs[0].Input, 9);
+				if(engine.CurrentTick == 2) engine.ScheduleStimulus(rs[0].Input, 0);
+
+				Console.WriteLine(sw.ElapsedMilliseconds + "ms");
+				//Console.WriteLine(string.Concat(rs.Take(60).Select(x => x.Input.PowerLevel)));
 			}
 		}
 	}

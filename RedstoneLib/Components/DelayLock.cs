@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 namespace RedstoneLib.Components {
 	public class DelayLock : RSComponent {
 		public int Delay { get; set; }
-
 		public RSConnection Output { get; private set; }
 		public RSConnection Input { get; private set; }
 		public RSConnection Lock { get; private set; }
@@ -20,22 +19,17 @@ namespace RedstoneLib.Components {
 			Input = CreateInput("In");
 			Lock = CreateInput("Lock");
 
-			Input.SignalChanged += SignalChangedHandler;
-			Lock.SignalChanged += SignalChangedHandler;
-
-			Delay = 1;
-		}
-
-		private long lastSignalChangeTick;
-		private void SignalChangedHandler(object sender, int oldLevel) {
-			if(lastSignalChangeTick == CurrentTick) return;
-			lastSignalChangeTick = CurrentTick;
-
-			if(sender == Input) {
+			Input.SignalChanged += (s, l) => {
 				memory.Enqueue(Input.PowerLevel);
 				ScheduleAction(UpdateState, CurrentTick + Delay);
+			};
 
-			} else if(memory.Count == 0) ScheduleAction(UpdateState, CurrentTick + 1);
+			Lock.SignalChanged += (s, l) => {
+				if(memory.Count == 0 && Lock.PowerLevel == 0) {
+					ScheduleAction(UpdateState, CurrentTick + 1);
+				}
+			};
+			Delay = 1;
 		}
 
 		private long lastUpdateTick;
@@ -43,8 +37,7 @@ namespace RedstoneLib.Components {
 			if(lastUpdateTick == CurrentTick) return;
 			lastUpdateTick = CurrentTick;
 
-			var powerLevel = memory.Dequeue();
-			if(Lock.PowerLevel == 0) ScheduleStimulus(Output, powerLevel);
+			ScheduleStimulus(Output, memory.Count > 0 ? memory.Dequeue() : Input.PowerLevel);
 		}
 	}
 }

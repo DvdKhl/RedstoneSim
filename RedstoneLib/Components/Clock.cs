@@ -9,24 +9,27 @@ namespace RedstoneLib.Components {
 		public RSConnection Output { get; private set; }
 
 		private bool enabled;
-		public bool Enabled { get { return enabled; } set { enabled = value; ScheduleUpdate(); } }
+		public bool Enabled {
+			get { return enabled; }
+			set { enabled = value; ScheduleUpdate(); }
+		}
 
-		public int LowPowerLevel { get; set; }
-		public int HighPowerLevel { get; set; }
-		public int HighWidth { get; set; }
-		public int LowWidth { get; set; }
+		public int IdlePowerLevel { get; set; }
+		public int PulsePowerLevel { get; set; }
+		public int PulseWidth { get; set; }
+		public int IdleWidth { get; set; }
 
 		public Clock(RSEngine engine)
 			: base(engine) {
 			Output = CreateOutput("Out");
 
-			LowPowerLevel = 0;
-			HighPowerLevel = RSEngine.MaxPowerLevel;
+			IdlePowerLevel = 0;
+			PulsePowerLevel = RSEngine.MaxPowerLevel;
 
 			ScheduleUpdate();
 		}
 
-		private bool isLow = false;
+		private bool isIdle = false;
 		private bool isActionScheduled = false;
 
 		private void ScheduleUpdate() {
@@ -41,11 +44,9 @@ namespace RedstoneLib.Components {
 				return;
 			}
 
-			ScheduleStimulus(Output, isLow ? LowPowerLevel : HighPowerLevel);
-
-			ScheduleAction(UpdateState, CurrentTick + (isLow ? LowWidth : HighWidth));
-			isLow = !isLow;
+			ScheduleStimulus(Output, isIdle ? IdlePowerLevel : PulsePowerLevel);
+			ScheduleAction(UpdateState, CurrentTick + (isIdle ? IdleWidth : PulseWidth));
+			isIdle = !isIdle;
 		}
-
 	}
 }
