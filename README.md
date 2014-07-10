@@ -52,8 +52,8 @@ public class DelayLock : RSComponent {
 	}
 }
 ```
-**Other components**:
-[Clock](../blob/master/RedstoneLib/Components/Clock.cs),  
+**Other components**: 
+[Clock](../blob/master/RedstoneLib/Components/Clock.cs), 
 [EdgeDetector](../blob/master/RedstoneLib/Components/EdgeDetector.cs), 
 [Lever](../blob/master/RedstoneLib/Components/Lever.cs), 
 [LogicGate](../blob/master/RedstoneLib/Components/LogicGate.cs), 
