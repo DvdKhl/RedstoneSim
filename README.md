@@ -53,12 +53,12 @@ public class DelayLock : RSComponent {
 }
 ```
 **Other components**: 
-[Clock](../blob/master/RedstoneLib/Components/Clock.cs), 
-[EdgeDetector](../blob/master/RedstoneLib/Components/EdgeDetector.cs), 
-[Lever](../blob/master/RedstoneLib/Components/Lever.cs), 
-[LogicGate](../blob/master/RedstoneLib/Components/LogicGate.cs), 
-[ShiftRegister](../blob/master/RedstoneLib/Components/ShiftRegister.cs), 
-[SignalQueue](../blob/master/RedstoneLib/Components/SignalQueue.cs)
+[Clock](../master/RedstoneLib/Components/Clock.cs), 
+[EdgeDetector](../master/RedstoneLib/Components/EdgeDetector.cs), 
+[Lever](../master/RedstoneLib/Components/Lever.cs), 
+[LogicGate](../master/RedstoneLib/Components/LogicGate.cs), 
+[ShiftRegister](../master/RedstoneLib/Components/ShiftRegister.cs), 
+[SignalQueue](../master/RedstoneLib/Components/SignalQueue.cs)
 
 ####Performance
 For a quick test I used ``10000`` ``DelayLocks`` (comparable to *Repeaters* in Minecraft) and chained them linearly.
