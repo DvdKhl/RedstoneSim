@@ -37,7 +37,7 @@ namespace RedstoneLib.Components {
 			if(lastUpdateTick == CurrentTick) return;
 			lastUpdateTick = CurrentTick;
 
-			ScheduleStimulus(Output, memory.Count > 0 ? memory.Dequeue() : Input.PowerLevel);
+			if(Lock.PowerLevel == 0) ScheduleStimulus(Output, memory.Count > 0 ? memory.Dequeue() : Input.PowerLevel);
 		}
 	}
 }

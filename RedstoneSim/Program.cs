@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace RedstoneSim {
 	class Program {
 		static void Main(string[] args) {
-			Playground3();
+			Playground2();
 		}
 
 		private static void Playground() {
@@ -63,19 +63,21 @@ namespace RedstoneSim {
 				Delay = 1,
 				IdlePowerLevel = RSEngine.MaxPowerLevel,
 				PulsePowerLevel = 0,
-				PulseWidth = 16
+				PulseWidth = 17
 			};
+
+			var delayLock = new DelayLock(engine);
 
 			var signal = new SignalQueue(engine);
 			signal.AddSequence(new[] { 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0 });
 
 			RSBridge.Connect(signal.Output, register.Input, edgeDetector.Input);
-			RSBridge.Connect(register.Lock, edgeDetector.Output);
-
+			RSBridge.Connect(edgeDetector.Output, register.Lock, delayLock.Lock);
+			RSBridge.Connect(register.Output, delayLock.Input);
 
 			while(true) {
 				Console.Write("T" + engine.CurrentTick + "\t");
-				Console.WriteLine(register);
+				Console.WriteLine(register + "  " + delayLock.Output.PowerLevel);
 
 				engine.DoTick();
 			}

@@ -11,7 +11,12 @@ namespace RedstoneLib.Components {
 		public bool IsActive { get; protected set; }
 		public bool IsLocked { get; protected set; }
 		public bool IsAnalog { get; set; }
-		public int CellCount { get; set; }
+
+		private int cellCount;
+		public int CellCount {
+			get { return cellCount + 1; }
+			set { cellCount = value - 1; }
+		}
 
 		public RSConnection Output { get; private set; }
 		public RSConnection Input { get; private set; }
@@ -47,14 +52,11 @@ namespace RedstoneLib.Components {
 			if(lastTick == CurrentTick) return;
 			lastTick = CurrentTick;
 
-			int outputLevel;
+			int outputLevel = -1;
 			IsLocked = Lock.PowerLevel > 0;
-			if(IsLocked) {
-				outputLevel = memory.Count > 0 ? memory.Peek() : Output.PowerLevel;
-
-			} else {
-				outputLevel = CellCount > 0 && memory.Count >= CellCount ? memory.Dequeue() : Input.PowerLevel;
-				if(memory.Count < CellCount) memory.Enqueue(IsAnalog ? Input.PowerLevel : (Input.PowerLevel > 0 ? RSEngine.MaxPowerLevel : 0));
+			if(!IsLocked) {
+				outputLevel = cellCount > 0 && memory.Count >= cellCount ? memory.Dequeue() : -1;
+				if(memory.Count < cellCount) memory.Enqueue(IsAnalog ? Input.PowerLevel : (Input.PowerLevel > 0 ? RSEngine.MaxPowerLevel : 0));
 
 				if(!memory.All(x => x == outputLevel)) {
 					ScheduleAction(UpdateState, CurrentTick + 1);
@@ -63,7 +65,7 @@ namespace RedstoneLib.Components {
 
 			}
 
-			if(outputLevel != Output.PowerLevel) ScheduleStimulus(Output, outputLevel);
+			if(outputLevel != -1) ScheduleStimulus(Output, outputLevel);
 
 			IsActive = outputLevel > 0;
 		}
@@ -74,9 +76,9 @@ namespace RedstoneLib.Components {
 			var lockA = Lock.PowerLevel > 0 ? "<" : "(";
 			var lockB = Lock.PowerLevel > 0 ? ">" : ")";
 
-			var memStr = string.Join(",", memory.Reverse().Select(x => IsAnalog ? x.ToString("X") : (x > 0 ? "1" : "0")));
+			var memStr = string.Concat(memory.Reverse().Select(x => IsAnalog ? x.ToString("X") : (x > 0 ? "1" : "0")));
 
-			return inStr + "=>" + lockA + memStr + lockB + "=>" + outStr;
+			return inStr + lockA + memStr + lockB + outStr;
 		}
 	}
 }
