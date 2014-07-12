@@ -22,7 +22,10 @@ namespace RedstoneLib.Components {
 			if(lastUpdateTick == CurrentTick) return;
 			lastUpdateTick = CurrentTick;
 
-			if(Next != null) ScheduleStimulus(Output, Next(CurrentTick));
+			if(Next != null) {
+				var nextPowerLevel = Next(CurrentTick);
+				if(nextPowerLevel != Output.PowerLevel) ScheduleStimulus(Output, nextPowerLevel);
+			}
 			ScheduleAction(UpdateState, CurrentTick + 1);
 		}
 	}
