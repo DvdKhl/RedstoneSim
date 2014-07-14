@@ -44,7 +44,7 @@
     <Compile Include="Components\LogicGate.cs" />
     <Compile Include="Components\Clock.cs" />
     <Compile Include="Components\Lever.cs" />
-    <Compile Include="Components\ShiftRegister.cs" />
+    <Compile Include="Components\SerialMemory.cs" />
     <Compile Include="Components\SignalGenerator.cs" />
     <Compile Include="Components\SignalQueue.cs" />
     <Compile Include="RSBridge.cs" />

@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace RedstoneLib.Components {
-	public class ShiftRegister : RSComponent {
+	public class SerialMemory : RSComponent {
 		public const int InitCellCapacity = 32;
 
 		public bool IsActive { get; protected set; }
@@ -25,7 +25,7 @@ namespace RedstoneLib.Components {
 		private Queue<int> memory;
 		private bool actionScheduled;
 
-		public ShiftRegister(RSEngine engine)
+		public SerialMemory(RSEngine engine)
 			: base(engine) {
 			Output = CreateOutput("Out");
 			Input = CreateInput("In");

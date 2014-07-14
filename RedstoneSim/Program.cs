@@ -16,10 +16,10 @@ namespace RedstoneSim {
 		private static void Playground() {
 			var engine = new RSEngine();
 
-			var rs = new ShiftRegister[9];
+			var rs = new SerialMemory[9];
 
 			for(int i = 0; i < rs.Length; i++) {
-				rs[i] = new ShiftRegister(engine) { Label = ((char)('A' + i)).ToString() };
+				rs[i] = new SerialMemory(engine) { Label = ((char)('A' + i)).ToString() };
 				if(i > 0) RSBridge.Connect(rs[i - 1].Output, rs[i].Input);
 
 				rs[i].CellCount = 1;
@@ -56,7 +56,7 @@ namespace RedstoneSim {
 		private static void Playground2() {
 			var engine = new RSEngine();
 
-			var register = new ShiftRegister(engine);
+			var register = new SerialMemory(engine);
 			register.CellCount = 16;
 
 			var edgeDetector = new EdgeDetector(engine) {
