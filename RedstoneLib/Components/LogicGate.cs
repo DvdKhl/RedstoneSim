@@ -66,12 +66,14 @@ namespace RedstoneLib.Components {
 
 		public static CompositeLogic operator &(CompositeLogic a, CompositeLogic b) { return new CompositeLogicAnd(a, b); }
 		public static CompositeLogic operator |(CompositeLogic a, CompositeLogic b) { return new CompositeLogicOr(a, b); }
+		public static CompositeLogic operator +(CompositeLogic a, CompositeLogic b) { return new CompositeLogicAdd(a, b); }
+		public static CompositeLogic operator -(CompositeLogic a, CompositeLogic b) { return new CompositeLogicSubtract(a, b); }
 		public static CompositeLogic operator !(CompositeLogic input) { return new CompositeLogicNot(input); }
 	}
 	public class CompositeLogicConnection : CompositeLogic {
 		public RSConnection Connection { get; private set; }
 
-		public CompositeLogicConnection(RSConnection connection) { 
+		public CompositeLogicConnection(RSConnection connection) {
 			Connection = connection;
 			if(connection.Direction != ConnectionDirection.Out) throw new ArgumentException("Connection direction must be out");
 		}
@@ -114,6 +116,41 @@ namespace RedstoneLib.Components {
 			remove { foreach(var input in Inputs) input.SignalChanged -= value; }
 		}
 
+	}
+	public class CompositeLogicSubtract : CompositeLogic {
+		public IEnumerable<CompositeLogic> Inputs { get; private set; }
+
+		public CompositeLogicSubtract(IEnumerable<CompositeLogic> inputs) { Inputs = inputs; }
+		public CompositeLogicSubtract(params CompositeLogic[] inputs) : this((IEnumerable<CompositeLogic>)inputs) { }
+
+		public override int Evaluate() {
+			var iterator = Inputs.GetEnumerator();
+			if(!iterator.MoveNext()) return 0;
+
+			var value = iterator.Current.Evaluate();
+			while(iterator.MoveNext()) value -= iterator.Current.Evaluate();
+			return value < 0 ? 0 : value;
+		}
+		public override event EventHandler<int> SignalChanged {
+			add { foreach(var input in Inputs) input.SignalChanged += value; }
+			remove { foreach(var input in Inputs) input.SignalChanged -= value; }
+		}
+	}
+	public class CompositeLogicAdd : CompositeLogic {
+		public IEnumerable<CompositeLogic> Inputs { get; private set; }
+
+		public CompositeLogicAdd(IEnumerable<CompositeLogic> inputs) { Inputs = inputs; }
+		public CompositeLogicAdd(params CompositeLogic[] inputs) : this((IEnumerable<CompositeLogic>)inputs) { }
+
+		public override int Evaluate() {
+			var value = 0;
+			foreach(var input in Inputs) value += input.Evaluate();
+			return value;
+		}
+		public override event EventHandler<int> SignalChanged {
+			add { foreach(var input in Inputs) input.SignalChanged += value; }
+			remove { foreach(var input in Inputs) input.SignalChanged -= value; }
+		}
 	}
 	public class CompositeLogicNot : CompositeLogic {
 		public CompositeLogic Input { get; private set; }
