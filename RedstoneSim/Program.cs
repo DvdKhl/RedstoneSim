@@ -33,8 +33,8 @@ namespace RedstoneSim {
 			RSBridge.Connect(clock.Output, rs[0].Input);
 
 
-			var logicGate = new LogicGate(engine);
-			logicGate.Logic = clock.Output.ToLogic() & clock.Output.ToLogic();
+			//var logicGate = new LogicGate(engine);
+			//logicGate.Logic = clock.Output.ToLogic() & clock.Output.ToLogic();
 
 			var sw = new Stopwatch();
 
