@@ -1,16 +1,14 @@
 ﻿using RedstoneLib;
 
 public abstract class RSComponent : RSObject {
-	public RSComponent(RSEngine engine) : base(engine) {
+	protected RSComponent(RSEngine engine) : base(engine) { }
 
-	}
-
-	protected RSConnection CreateInput(string label = null) {
-		var connection = new RSConnection(this, ConnectionDirection.In) { Label = label };
-		return connection;
-	}
-	protected RSConnection CreateOutput(string label = null) {
-		var connection = new RSConnection(this, ConnectionDirection.Out) { Label = label };
+	protected RSConnection CreateInput(string label = null) { return CreateConnection(label, ConnectionDirection.In); }
+	protected RSConnection CreateOutput(string label = null) { return CreateConnection(label, ConnectionDirection.Out); }
+	private RSConnection CreateConnection(string label, ConnectionDirection direction) {
+		var connection = new RSConnection(this.Engine, direction) {
+			Label = string.IsNullOrEmpty(label) && string.IsNullOrEmpty(this.Label) ? "[NoName]" : (this.Label ?? "[NoName]") + "." + (label ?? "[NoName]")
+		};
 		return connection;
 	}
 
