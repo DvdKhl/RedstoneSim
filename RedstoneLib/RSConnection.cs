@@ -63,10 +63,7 @@ namespace RedstoneLib {
 			public CompositeLogic(IEnumerable<CompositeLogic> inputs) { this.Inputs = inputs; }
 
 
-			public RSConnection ToConnection() { return ToConnection(1); }
-			public RSConnection ToConnection(int delay) {
-				if(delay <= 0) throw new ArgumentOutOfRangeException("delay must be greater than 0");
-
+			public RSConnection ToConnection() {
 				var engine = GetEngine();
 				var connection = new RSConnection(engine, ConnectionDirection.Out);
 
@@ -85,7 +82,7 @@ namespace RedstoneLib {
 				EventHandler<int> signalChangedHandler = (sender, oldLevel) => {
 					if(lastSignalChangeTick == engine.CurrentTick) return;
 					lastSignalChangeTick = engine.CurrentTick;
-					engine.ScheduleAction(updateState, engine.CurrentTick + delay);
+					engine.ScheduleAction(updateState, engine.CurrentTick + 1);
 				};
 
 				return connection;
@@ -98,6 +95,8 @@ namespace RedstoneLib {
 			public static CompositeLogic operator -(CompositeLogic a, CompositeLogic b) { return new CompositeLogicSubtract(a, b); }
 			public static CompositeLogic operator -(CompositeLogic a, int powerLevel) { return new CompositeLogicConstantSubtract(a, powerLevel); }
 			public static CompositeLogic operator !(CompositeLogic input) { return new CompositeLogicNot(input); }
+			public static CompositeLogic operator ~(CompositeLogic input) { return new CompositeLogicInvert(input); }
+			public static CompositeLogic operator <<(CompositeLogic input, int delay) { return new CompositeLogicDelay(input, delay); }
 		}
 		private class CompositeLogicConnection : CompositeLogic {
 			public RSConnection Connection { get; private set; }
@@ -162,6 +161,12 @@ namespace RedstoneLib {
 
 			public override int Evaluate() { return input.Evaluate() == 0 ? RSEngine.MaxPowerLevel : 0; }
 		}
+		private class CompositeLogicInvert : CompositeLogic {
+			private CompositeLogic input;
+			public CompositeLogicInvert(CompositeLogic input) : base(new[] { input }) { this.input = input; }
+
+			public override int Evaluate() { return RSEngine.MaxPowerLevel - input.Evaluate(); }
+		}
 		private class CompositeLogicConstantAdd : CompositeLogic {
 			private CompositeLogic input;
 			private int powerLevel;
@@ -185,6 +190,18 @@ namespace RedstoneLib {
 			}
 
 			public override int Evaluate() { return Math.Max(0, input.Evaluate() - powerLevel); }
+		}
+		private class CompositeLogicDelay : CompositeLogic {
+			private CompositeLogic input;
+			private int delay;
+
+			public CompositeLogicDelay(CompositeLogic input, int delay)
+				: base(new[] { input }) {
+				this.input = input;
+				this.delay = delay;
+			}
+
+			public override int Evaluate() { throw new NotImplementedException(); }
 		}
 	}
 
