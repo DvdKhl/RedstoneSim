@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace RedstoneSim {
 	class Program {
 		static void Main(string[] args) {
-			Playground2();
+			Playground();
 		}
 
 		private static void Playground() {
@@ -33,8 +33,7 @@ namespace RedstoneSim {
 			RSBridge.Connect(clock.Output, rs[0].Input);
 
 
-			//var logicGate = new LogicGate(engine);
-			//logicGate.Logic = clock.Output.ToLogic() & clock.Output.ToLogic();
+			var compositeConnection = ((clock.Output.ToLogic() & clock.Output.ToLogic()) + 10).ToConnection();
 
 			var sw = new Stopwatch();
 

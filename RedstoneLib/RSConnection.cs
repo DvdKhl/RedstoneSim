@@ -62,7 +62,6 @@ namespace RedstoneLib {
 
 			public CompositeLogic(IEnumerable<CompositeLogic> inputs) { this.Inputs = inputs; }
 
-
 			public RSConnection ToConnection() {
 				var engine = GetEngine();
 				var connection = new RSConnection(engine, ConnectionDirection.Out);
@@ -84,6 +83,8 @@ namespace RedstoneLib {
 					lastSignalChangeTick = engine.CurrentTick;
 					engine.ScheduleAction(updateState, engine.CurrentTick + 1);
 				};
+
+				SignalChanged += signalChangedHandler;
 
 				return connection;
 			}
